@@ -8,8 +8,8 @@ Supports filtering by --wifi, --ethernet, --virtual-box
 
 import argparse
 import sys
-import os.path
-sys.path.append(os.path.dirname(__file__))
+#import os.path
+#sys.path.append(os.path.dirname(__file__))
 import winpy.lanman
 
 def main(argv=None):
