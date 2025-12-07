@@ -8,6 +8,8 @@
 
 """
 
+# pylint: disable=missing-function-docstring
+
 import json
 import socket
 import psutil
@@ -26,6 +28,10 @@ def list_them():
     if virtual:
         print("### box:", sorted(res["virtual"]))
     return res
+
+def get_interfaces():
+    """ Wrapper to get network interfaces! """
+    return get_my_interfaces()
 
 def get_my_interfaces():
     """ Retrieve my interfaces. """

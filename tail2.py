@@ -45,6 +45,7 @@ def tail(filename, n=10, follow=False):
                     time.sleep(0.5)
 
 def main():
+    """ Main script! """
     parser = argparse.ArgumentParser(
         description="Python implementation of tail (last lines of a file)."
     )
