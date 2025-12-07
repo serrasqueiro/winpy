@@ -98,6 +98,11 @@ def filter_interfaces(interfaces, args, kind=""):
             perfect = len(later) == 1  and simple == simplest(args.interfaces[0])
             if not later:
                 continue
+            # If 'bare' we go ahead, otherwise we only go ahead if 'store' is filled in.
+            ahead = bare or store
+            if not ahead:
+                #print("::: Ignoring because of option:", [kind, desc])
+                continue
             if perfect:
                 got_it = [(9, name, info)]
             elif not got_it or got_it[0][0] < 9:
