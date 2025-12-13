@@ -6,15 +6,19 @@ Command-line tool to summarize network interfaces using winpy.lanman.
 Supports filtering by --wifi, --ethernet, --virtual-box
 """
 
+# pylint: disable=missing-function-docstring
+
 import argparse
 import sys
 #import os.path
 #sys.path.append(os.path.dirname(__file__))
 import winpy.lanman
+from winpy.lanman import aprint
+
 
 def main(argv=None):
     """Main entry point."""
-    code, _, _ = script(sys.argv[1:])
+    code, _, _ = script(sys.argv[1:] if argv is None else argv)
     return code
 
 
@@ -35,6 +39,12 @@ def parse_args(argv):
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
         description="Summarize network interfaces (Wi-Fi, Ethernet, VirtualBox)."
+    )
+    parser.add_argument(
+        "-v", "--verbose",
+        action="count",
+        default=0,
+        help="Verbose level",
     )
     parser.add_argument(
         "--wifi",
@@ -80,12 +90,21 @@ def filter_interfaces(interfaces, args, kind=""):
         desc = info.get("caption", "") or info.get("description", "") or name
         simple = simplest(desc)
         store, bare = {}, False
+        a_type = "" if "type" not in info else info["type"]
+        aprint(
+            "\n#", f"name={repr(name)}, simple={simple}, info={info}",
+            cond=args, level=3,
+        )
+        aprint(
+            f"name={repr(name)}, simple={simple}",
+            cond=args,
+        )
         if not simple:
             continue
         assert isinstance(info, dict), f"Wow: {info}"
-        if args.wifi and "Wi-Fi" in desc:
+        if args.wifi and ("Wi-Fi" in desc or "Wi-Fi" in a_type):
             store = info
-        elif args.ethernet and "Ethernet" in desc:
+        elif args.ethernet and ("Ethernet" in desc or "Ethernet" in a_type):
             store = info
         elif args.virtual_box and kind in ("virtual",):
             store = info
@@ -108,8 +127,16 @@ def filter_interfaces(interfaces, args, kind=""):
             elif not got_it or got_it[0][0] < 9:
                 got_it.append((1, name, info))
             continue
+        aprint(
+            f'# Checking [{simple}, {desc}], store={"Y" if store else "N"}'
+            f', {a_type}: {tuple(sorted(store))}',
+            end=" <<<\n",
+            cond=args, level=2,
+        )
         if store:
             result[name] = store
+        else:
+            aprint(f"# [{desc}]: skipped", cond=args, level=2)
     if not got_it:
         return result
     # Check if there was a perfect match, only return that one, or otherwise return all substrings:

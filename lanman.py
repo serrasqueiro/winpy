@@ -51,13 +51,29 @@ def get_my_interfaces():
     res = split_ifs(interfaces)
     return res
 
-def classify_interface(name):
+
+def classify_interface(name: str) -> str:
+    """ Classify interface type based on its name.
+    Works across Windows and Linux naming conventions.
+    """
+    lname = name.lower()
+    # Wi-Fi / Wireless
+    if "wi-fi" in lname or "wifi" in lname or "wlan" in lname or "wireless" in lname:
+        return "Wi-Fi"
+    # Ethernet (Windows: "Ethernet", Linux: eth0, enpXsY, ensX)
+    if "ethernet" in lname or lname.startswith("eth") or lname.startswith("enp") or lname.startswith("ens"):
+        return "Ethernet"
+    return "other"
+
+
+def classify_interface_old(name):
     """ Major (lan/ wifi) Interface Classification """
     if "Wi-Fi" in name or "Wireless" in name:
         return "wifi"
     if "Ethernet" in name:
         return "ethernet"
     return "other"
+
 
 def itemized(addr):
     """ Returns a dictionary based information. """
@@ -111,10 +127,34 @@ def split_ifs(interfaces):
     res = {"own": own, "virtual": virtual}
     return res
 
+
 def tostring(obj):
     """ Returns the JSON equivalent """
     astr = json.dumps(obj, indent=4)
     return astr
+
+
+def aprint(*args, **kwargs):
+    """ Conditional print function.
+
+    Args:
+        *args: Values to print.
+        **kwargs:
+            cond (object, optional): Object with a 'verbose' attribute.
+            level (int, optional): Minimum verbosity required to print (default 1).
+            sep, end, file: Passed through to built-in print().
+    Returns:
+        bool: True if printed, False otherwise.
+    """
+    show = True
+    cond = kwargs.pop("cond", None)
+    level = kwargs.pop("level", 1)
+    if cond is not None and hasattr(cond, "verbose"):
+        show = cond.verbose >= level
+    if show:
+        print(*args, **kwargs)
+    return show
+
 
 if __name__ == "__main__":
     main()
